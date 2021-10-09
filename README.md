@@ -1,7 +1,7 @@
-# Conway's Game of Life com visualizacao grafica
+# Busca em Profundidade com visualizacao grafica
 
 ## Resumo:
-Utilizando como base o GoL no terminal publicado anteriormente, foi-se criado um programa novo utilizando-se da biblioteca raylib para criacao de janela e renderizacao das celulas, assim como uma maneira mais interativa de fazer o mapa inicial. 
+Trabalho de Teoria dos Grafos, utilizando como base o Game of Life anteriormente feito, foi-se criada uma interface grafica.
 
 ## Instrucoes:
 Instale o make e raylib.
@@ -21,10 +21,10 @@ https://github.com/raysan5/raylib/wiki/Working-on-Windows
 ### Compilar:
 Apos instalar os requisitos mencionados e baixar o repositorio, entre na pasta build e execute o comando make, depois disso basta executar GoL.bin para utilizar.
 ```
-git clone https://github.com/TarcisMoreda/Game-Of-Life-Raylib.git
+git clone https://github.com/TarcisMoreda/Busca-em-Profundidade-Raylib.git
 cd Game\ Of\ Life\ Window/build
 make
-./GoL.bin
+./BuscaProfundidade.bin
 ```
 
 ### Aviso:
@@ -32,12 +32,12 @@ Os paramentros de compilacao do arquivo make estao otimizados para ArchLinux com
 
 ### Antes:
 ```
-GoL: main.o game.o
-gcc main.o game.o -o GoL.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor
+busca: main.o game.o pilha.o
+	gcc main.o game.o pilha.o -o BuscaProfundidade.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor
 ```
 
 ### Depois:
 ```
-GoL: main.o game.o
-gcc main.o game.o -o GoL.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl
+busca: main.o game.o pilha.o
+	gcc main.o game.o pilha.o -o BuscaProfundidade.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl
 ```
