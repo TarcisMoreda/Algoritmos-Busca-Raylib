@@ -9,8 +9,8 @@
 #define largura_janela 1200
 #define altura_janela 950
 #define tamanho_celula 16
-#define colunas 6000
-#define linhas 6000
+#define colunas 200
+#define linhas 200
 #define colunas_tela ((int) largura_janela/tamanho_celula)
 #define linhas_tela ((int) (altura_janela-50)/tamanho_celula)
 #define fps 60
