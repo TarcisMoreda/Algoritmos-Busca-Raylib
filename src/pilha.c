@@ -36,6 +36,23 @@ int remove_pilha(pilha* pi){
     return 1;
 }
 
+int checar_valor_pilha(pilha* pi, dados coordenada){
+    if(pi == NULL) return 0;
+
+    pilha copia = *pi;
+    elemento* no;
+
+    while (copia->proximo != NULL){
+        if (copia->coordenada.x == coordenada.x && copia->coordenada.y == coordenada.y) 
+        return 1;
+
+        no = copia;
+        copia = no->proximo;
+    }
+
+    return 0;
+}
+
 //Remove todos os dados da pilha
 int limpar_pilha(pilha* pi){
     if(pi == NULL) return 0;

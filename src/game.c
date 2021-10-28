@@ -1,5 +1,4 @@
 #include "../include/game.h"
-#include <stdlib.h>
 
 int offset_x = 0;
 int offset_y = 0;
@@ -23,9 +22,24 @@ celula** criar_tabuleiro(){
     return tabuleiro;
 }
 
+dados** criar_caminho(){
+    dados** caminho = NULL;
+    caminho = (dados**) malloc(sizeof(dados*)*colunas);
+    for (int x=0; x<colunas; x++) caminho[x] = (dados*) malloc(sizeof(dados)*linhas);
+
+    for (int y=0; y<linhas; y++)
+    for (int x=0; x<colunas; x++){
+        caminho[x][y].x = 0;
+        caminho[x][y].y = 0;
+    }
+
+    return caminho;
+}
+
 //Aplica o algoritmo de busca em profundidade e muda os estados de todas as celulas de acordo
-int passo_jogo(celula** tabuleiro, pilha* pi, bool* estado_jogo){
+int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho, bool* estado_jogo){
     if (tabuleiro == NULL) return 0;
+    if (caminho == NULL) return 0;
     if (pi == NULL) return 0;
 
     dados atual;
@@ -47,6 +61,16 @@ int passo_jogo(celula** tabuleiro, pilha* pi, bool* estado_jogo){
     remove_pilha(pi);
     
     if (tabuleiro[atual.x][atual.y].estado == destino) {
+        coord = caminho[atual.x][atual.y];
+        atual = coord;
+
+        while(tabuleiro[atual.x][atual.y].estado != inicio){
+            tabuleiro[atual.x][atual.y].estado = estrada;
+
+            coord = caminho[atual.x][atual.y];
+            atual = coord;
+        }
+
         *estado_jogo = false;
         return 1;
     }
@@ -59,13 +83,17 @@ int passo_jogo(celula** tabuleiro, pilha* pi, bool* estado_jogo){
             if (atual.x+i == colunas || atual.y+j == linhas) continue;
             if ((i == -1 && j == 1) || (i == 1 && j == 1) || (i == -1 && j == -1) || (i == 1 && j == -1)) continue;
             
-            if (tabuleiro[atual.x+i][atual.y+j].estado != checado && tabuleiro[atual.x+i][atual.y+j].estado != parede && tabuleiro[atual.x+i][atual.y+j].estado != inicio){
+            if (tabuleiro[atual.x+i][atual.y+j].estado != checado 
+            && tabuleiro[atual.x+i][atual.y+j].estado != parede
+            && tabuleiro[atual.x+i][atual.y+j].estado != inicio){
                 coord.x = atual.x+i;
                 coord.y = atual.y+j;
+                caminho[atual.x+i][atual.y+j].x = atual.x;
+                caminho[atual.x+i][atual.y+j].y = atual.y;
                 insere_pilha(pi, coord);
             }
         }
-        if (tabuleiro[atual.x][atual.y].estado != inicio)tabuleiro[atual.x][atual.y].estado = checado;
+        if (tabuleiro[atual.x][atual.y].estado != inicio) tabuleiro[atual.x][atual.y].estado = checado;
     }
 
     return 1;
@@ -102,6 +130,10 @@ int mostrar_tabuleiro(celula** tabuleiro){
 
                 case destino:
                 DrawRectangleRec(tabuleiro[x][y].rect, GOLD);
+                break;
+
+                case estrada:
+                DrawRectangleRec(tabuleiro[x][y].rect, BLUE);
                 break;
             }            
         }
@@ -240,6 +272,16 @@ int limpar_memoria_tabuleiro(celula** tabuleiro){
     
     for (int x=0; x<colunas; x++) free(tabuleiro[x]);
     free(tabuleiro);
+
+    return 1;
+}
+
+//Limpa a memoria do caminho
+int limpar_memoria_caminho(dados** caminho){
+    if (caminho == NULL) return 0;
+    
+    for (int x=0; x<colunas; x++) free(caminho[x]);
+    free(caminho);
 
     return 1;
 }

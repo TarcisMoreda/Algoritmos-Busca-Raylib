@@ -3,6 +3,7 @@
 int main(int argc, char const *argv[]){
     //Alocando toda a memoria nescessaria para o jogo funcionar
     celula** tabuleiro = criar_tabuleiro();
+    dados** caminho = criar_caminho();
     pilha* pi = criar_pilha();
 
     //Variaveis para a logica do jogo
@@ -57,7 +58,7 @@ int main(int argc, char const *argv[]){
             else if (*pi != NULL && inicio && destino){
                 for (int y=0; y<linhas; y++)
                 for (int x=0; x<colunas; x++)
-                if (tabuleiro[x][y].estado == checado)
+                if (tabuleiro[x][y].estado == checado || tabuleiro[x][y].estado == estrada)
                 tabuleiro[x][y].estado = vazio;
                 
                 limpar_pilha(pi);
@@ -85,11 +86,11 @@ int main(int argc, char const *argv[]){
 
         //Condicao para o proximo passo
         if (frame_atual%frames_por_passo == 0 && estado_jogo){
-            passo_jogo(tabuleiro, pi, &estado_jogo);
+            busca_profundidade(tabuleiro, pi, caminho, &estado_jogo);
             ++passo;    
         }
 
-        //Concatenando str das geracoes
+        //Concatenando str dos passos
         snprintf(str_passo, 50, "Passos: %d", passo);
 
         BeginDrawing();
@@ -101,11 +102,11 @@ int main(int argc, char const *argv[]){
         if (!estado_jogo) {
             DrawRectangleRec(botao_iniciar, LIME);
             DrawText("Iniciar", botao_iniciar.x+10, botao_iniciar.y+5, altura_janela-botao_iniciar.y, WHITE);
-            }
+        }
         else{
             DrawRectangleRec(botao_iniciar, RED);
             DrawText("Parar", botao_iniciar.x+10, botao_iniciar.y+5, altura_janela-botao_iniciar.y, WHITE);
-            }
+        }
 
         DrawRectangleRec(botao_limpar, BROWN);
         DrawText("Limpar", botao_limpar.x+20, botao_limpar.y+5, altura_janela-botao_limpar.y, WHITE);
@@ -121,6 +122,7 @@ int main(int argc, char const *argv[]){
 
     //Limpando memoria e finalizando raylib
     limpar_memoria_pilha(pi);
+    limpar_memoria_caminho(caminho);
     limpar_memoria_tabuleiro(tabuleiro);
     CloseWindow();
 
