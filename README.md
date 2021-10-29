@@ -19,7 +19,7 @@ https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux
 https://github.com/raysan5/raylib/wiki/Working-on-Windows
 
 ### Compilar:
-Apos instalar os requisitos mencionados e baixar o repositorio, entre na pasta build e execute o comando make, depois disso basta executar GoL.bin para utilizar.
+Apos instalar os requisitos mencionados e baixar o repositorio, entre na pasta build e execute o comando make, depois disso basta executar BuscaProfundidade.bin para utilizar.
 ```
 git clone https://github.com/TarcisMoreda/Busca-em-Profundidade-Raylib.git
 cd Game\ Of\ Life\ Window/build
