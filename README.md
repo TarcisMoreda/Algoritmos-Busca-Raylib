@@ -32,7 +32,7 @@ make
 Altera as funcoes dos botoes do mouse.
 ### LMB:
 Parede/inicio
-### RMB
+### RMB:
 Borracha/Destino
 
 ## Aviso:
