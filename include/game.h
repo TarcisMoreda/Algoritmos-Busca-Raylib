@@ -19,7 +19,7 @@
 #define frames_por_passo ((int) fps/passos_por_segundo)
 
 //definindo os estados de uma celula
-enum{inicio, vazio, parede, checado, destino, estrada};
+enum{inicio, vazio, parede, checado, finalizado, caminho, destino};
 
 typedef struct{
     Rectangle rect;

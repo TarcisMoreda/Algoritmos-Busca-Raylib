@@ -3,7 +3,7 @@
 int main(int argc, char const *argv[]){
     //Alocando toda a memoria nescessaria para o jogo funcionar
     celula** tabuleiro = criar_tabuleiro();
-    dados** caminho = criar_caminho();
+    dados** caminho_dados = criar_caminho();
     pilha* pi = criar_pilha();
 
     //Variaveis para a logica do jogo
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[]){
             else if (*pi != NULL && inicio && destino){
                 for (int y=0; y<linhas; y++)
                 for (int x=0; x<colunas; x++)
-                if (tabuleiro[x][y].estado == checado || tabuleiro[x][y].estado == estrada)
+                if (tabuleiro[x][y].estado == checado || tabuleiro[x][y].estado == finalizado || tabuleiro[x][y].estado == caminho)
                 tabuleiro[x][y].estado = vazio;
                 
                 limpar_pilha(pi);
@@ -86,8 +86,9 @@ int main(int argc, char const *argv[]){
 
         //Condicao para o proximo passo
         if (frame_atual%frames_por_passo == 0 && estado_jogo){
-            busca_profundidade(tabuleiro, pi, caminho, &estado_jogo);
-            ++passo;    
+            busca_profundidade(tabuleiro, pi, caminho_dados, &estado_jogo);
+            if (*pi == NULL) estado_jogo = false;
+            else ++passo;
         }
 
         //Concatenando str dos passos
@@ -122,7 +123,7 @@ int main(int argc, char const *argv[]){
 
     //Limpando memoria e finalizando raylib
     limpar_memoria_pilha(pi);
-    limpar_memoria_caminho(caminho);
+    limpar_memoria_caminho(caminho_dados);
     limpar_memoria_tabuleiro(tabuleiro);
     CloseWindow();
 

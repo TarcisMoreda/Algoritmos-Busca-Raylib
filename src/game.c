@@ -23,23 +23,23 @@ celula** criar_tabuleiro(){
 }
 
 dados** criar_caminho(){
-    dados** caminho = NULL;
-    caminho = (dados**) malloc(sizeof(dados*)*colunas);
-    for (int x=0; x<colunas; x++) caminho[x] = (dados*) malloc(sizeof(dados)*linhas);
+    dados** caminho_dados = NULL;
+    caminho_dados = (dados**) malloc(sizeof(dados*)*colunas);
+    for (int x=0; x<colunas; x++) caminho_dados[x] = (dados*) malloc(sizeof(dados)*linhas);
 
     for (int y=0; y<linhas; y++)
     for (int x=0; x<colunas; x++){
-        caminho[x][y].x = 0;
-        caminho[x][y].y = 0;
+        caminho_dados[x][y].x = 0;
+        caminho_dados[x][y].y = 0;
     }
 
-    return caminho;
+    return caminho_dados;
 }
 
 //Aplica o algoritmo de busca em profundidade e muda os estados de todas as celulas de acordo
-int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho, bool* estado_jogo){
+int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho_dados, bool* estado_jogo){
     if (tabuleiro == NULL) return 0;
-    if (caminho == NULL) return 0;
+    if (caminho_dados == NULL) return 0;
     if (pi == NULL) return 0;
 
     dados atual;
@@ -61,13 +61,13 @@ int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho, bool* est
     remove_pilha(pi);
     
     if (tabuleiro[atual.x][atual.y].estado == destino) {
-        coord = caminho[atual.x][atual.y];
+        coord = caminho_dados[atual.x][atual.y];
         atual = coord;
 
         while(tabuleiro[atual.x][atual.y].estado != inicio){
-            tabuleiro[atual.x][atual.y].estado = estrada;
+            tabuleiro[atual.x][atual.y].estado = caminho;
 
-            coord = caminho[atual.x][atual.y];
+            coord = caminho_dados[atual.x][atual.y];
             atual = coord;
         }
 
@@ -75,26 +75,28 @@ int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho, bool* est
         return 1;
     }
     
-    if (tabuleiro[atual.x][atual.y].estado != checado){
-        for (int i=-1; i<=1; ++i)
-        for (int j=-1; j<=1; ++j){
-            if (i == 0 && j == 0) continue;
-            if (atual.x+i == -1 || atual.y+j == -1) continue;
-            if (atual.x+i == colunas || atual.y+j == linhas) continue;
-            if ((i == -1 && j == 1) || (i == 1 && j == 1) || (i == -1 && j == -1) || (i == 1 && j == -1)) continue;
+    for (int i=-1; i<=1; ++i)
+    for (int j=-1; j<=1; ++j){
+        if (i == 0 && j == 0) continue;
+        if (atual.x+i == -1 || atual.y+j == -1) continue;
+        if (atual.x+i == colunas || atual.y+j == linhas) continue;
+        if ((i == -1 && j == 1) || (i == 1 && j == 1) || (i == -1 && j == -1) || (i == 1 && j == -1)) continue;
+        
+        if (tabuleiro[atual.x+i][atual.y+j].estado != finalizado
+        && tabuleiro[atual.x+i][atual.y+j].estado != checado
+        && tabuleiro[atual.x+i][atual.y+j].estado != parede
+        && tabuleiro[atual.x+i][atual.y+j].estado != inicio){
+            coord.x = atual.x+i;
+            coord.y = atual.y+j;
+            caminho_dados[coord.x][coord.y].x = atual.x;
+            caminho_dados[coord.x][coord.y].y = atual.y;
+            insere_pilha(pi, coord);
             
-            if (tabuleiro[atual.x+i][atual.y+j].estado != checado 
-            && tabuleiro[atual.x+i][atual.y+j].estado != parede
-            && tabuleiro[atual.x+i][atual.y+j].estado != inicio){
-                coord.x = atual.x+i;
-                coord.y = atual.y+j;
-                caminho[atual.x+i][atual.y+j].x = atual.x;
-                caminho[atual.x+i][atual.y+j].y = atual.y;
-                insere_pilha(pi, coord);
-            }
+            if (tabuleiro[coord.x][coord.y].estado != destino)
+            tabuleiro[coord.x][coord.y].estado = checado;
         }
-        if (tabuleiro[atual.x][atual.y].estado != inicio) tabuleiro[atual.x][atual.y].estado = checado;
     }
+    if (tabuleiro[atual.x][atual.y].estado == checado) tabuleiro[atual.x][atual.y].estado = finalizado;
 
     return 1;
 }
@@ -125,6 +127,10 @@ int mostrar_tabuleiro(celula** tabuleiro){
                 break;
 
                 case checado:
+                DrawRectangleRec(tabuleiro[x][y].rect, BLACK);
+                break;
+
+                case finalizado:
                 DrawRectangleRec(tabuleiro[x][y].rect, RED);
                 break;
 
@@ -132,8 +138,11 @@ int mostrar_tabuleiro(celula** tabuleiro){
                 DrawRectangleRec(tabuleiro[x][y].rect, GOLD);
                 break;
 
-                case estrada:
+                case caminho:
                 DrawRectangleRec(tabuleiro[x][y].rect, BLUE);
+                break;
+
+                default:
                 break;
             }            
         }
@@ -200,14 +209,23 @@ int checar_clique(celula** tabuleiro){
 
     for (int y=offset_y; y<linhas_tela+offset_y; ++y)
     for (int x=offset_x; x<colunas_tela+offset_x; ++x){ 
-        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && !alt)
+        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !alt)
         switch (tabuleiro[x][y].estado){
             case vazio:
             tabuleiro[x][y].estado = parede;
             break;
 
             default:
+            break;
+        }
+
+        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && !alt)
+        switch (tabuleiro[x][y].estado){
+            case parede:
             tabuleiro[x][y].estado = vazio;
+            break;
+
+            default:
             break;
         }
 
@@ -277,11 +295,11 @@ int limpar_memoria_tabuleiro(celula** tabuleiro){
 }
 
 //Limpa a memoria do caminho
-int limpar_memoria_caminho(dados** caminho){
-    if (caminho == NULL) return 0;
+int limpar_memoria_caminho(dados** caminho_dados){
+    if (caminho_dados == NULL) return 0;
     
-    for (int x=0; x<colunas; x++) free(caminho[x]);
-    free(caminho);
+    for (int x=0; x<colunas; x++) free(caminho_dados[x]);
+    free(caminho_dados);
 
     return 1;
 }
