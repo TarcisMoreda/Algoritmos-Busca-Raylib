@@ -3,6 +3,7 @@
 int offset_x = 0;
 int offset_y = 0;
 int alt = 0;
+int a = 0;
 
 //Funcao aloca memoria para o tabuleiro e preenche os dados de acordo
 celula** criar_tabuleiro(){
