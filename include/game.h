@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pilha.h"
+#include "fila.h"
 
 #if !defined(GAME_H)
 #define GAME_H
@@ -12,11 +13,12 @@
 #define tamanho_celula 24
 #define colunas 300
 #define linhas 300
-#define colunas_tela ((int) largura_janela/tamanho_celula)
+#define colunas_tela ((int) (largura_janela-50)/tamanho_celula)
 #define linhas_tela ((int) (altura_janela-50)/tamanho_celula)
 #define fps 60
 #define passos_por_segundo 10 //Deve ser menor ou igual ao fps
 #define frames_por_passo ((int) fps/passos_por_segundo)
+#define tamanho_fonte 50
 
 //definindo os estados de uma celula
 enum{inicio, vazio, parede, checado, finalizado, caminho, destino};
@@ -30,7 +32,9 @@ celula** criar_tabuleiro();
 dados** criar_caminho();
 int checar_vizinhos(celula** tabuleiro, int x, int y);
 int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho, bool* estado_jogos);
+int busca_largura(celula** tabuleiro, fila* fi, dados** caminho, bool* estado_jogos);
 int mostrar_tabuleiro(celula** tabuleiro);
+int desenhar_botao(Rectangle* botao, Color cor, char texto[]);
 int resetar_tabuleiro(celula** tabuleiro);
 int carregar_arquivo(celula** tabuleiro);
 int checar_clique(celula** tabuleiro);

@@ -1,15 +1,6 @@
+#include "dados.h"
 #if !defined(PILHA_H)
 #define PILHA_H
-
-typedef struct{
-    int x;
-    int y;
-} dados;
-
-typedef struct elemento{
-    dados coordenada;
-    struct elemento* proximo;
-} elemento;
 
 typedef elemento* pilha;
 

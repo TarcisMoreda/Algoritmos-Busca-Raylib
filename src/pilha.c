@@ -72,12 +72,7 @@ int limpar_pilha(pilha* pi){
 int limpar_memoria_pilha(pilha* pi){
     if (pi == NULL) return 0;
 
-    elemento* no;
-    while ((*pi) != NULL){
-        no = *pi;
-        *pi = no->proximo;
-        free(no);
-    }
+    limpar_pilha(pi);
     free(pi);
 
     return 1;

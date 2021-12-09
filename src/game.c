@@ -3,7 +3,6 @@
 int offset_x = 0;
 int offset_y = 0;
 int alt = 0;
-int a = 0;
 
 //Funcao aloca memoria para o tabuleiro e preenche os dados de acordo
 celula** criar_tabuleiro(){
@@ -72,6 +71,7 @@ int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho_dados, boo
             atual = coord;
         }
 
+        limpar_pilha(pi);
         *estado_jogo = false;
         return 1;
     }
@@ -102,6 +102,72 @@ int busca_profundidade(celula** tabuleiro, pilha* pi, dados** caminho_dados, boo
     return 1;
 }
 
+//Aplica o algoritmo de busca em largura e muda os estados de todas as celulas de acordo
+int busca_largura(celula** tabuleiro, fila* fi, dados** caminho_dados, bool* estado_jogo){
+    if (tabuleiro == NULL) return 0;
+    if (caminho_dados == NULL) return 0;
+    if (fi == NULL) return 0;
+
+    dados atual;
+    dados coord;
+    
+    if ((*fi).inicio == NULL){
+        for (int y=0; y<linhas; y++)
+        for (int x=0; x<colunas; x++) 
+        if (tabuleiro[x][y].estado == inicio){
+            atual.x = x;
+            atual.y = y;
+            break;
+        }
+
+        insere_fila(fi, atual);
+    }
+
+    atual = (*fi).inicio->coordenada;
+    remove_fila(fi);
+    
+    if (tabuleiro[atual.x][atual.y].estado == destino) {
+        coord = caminho_dados[atual.x][atual.y];
+        atual = coord;
+
+        while(tabuleiro[atual.x][atual.y].estado != inicio){
+            tabuleiro[atual.x][atual.y].estado = caminho;
+
+            coord = caminho_dados[atual.x][atual.y];
+            atual = coord;
+        }
+
+        limpar_fila(fi);
+        *estado_jogo = false;
+        return 1;
+    }
+    
+    for (int i=-1; i<=1; ++i)
+    for (int j=-1; j<=1; ++j){
+        if (i == 0 && j == 0) continue;
+        if (atual.x+i == -1 || atual.y+j == -1) continue;
+        if (atual.x+i == colunas || atual.y+j == linhas) continue;
+        if ((i == -1 && j == 1) || (i == 1 && j == 1) || (i == -1 && j == -1) || (i == 1 && j == -1)) continue;
+        
+        if (tabuleiro[atual.x+i][atual.y+j].estado != finalizado
+        && tabuleiro[atual.x+i][atual.y+j].estado != checado
+        && tabuleiro[atual.x+i][atual.y+j].estado != parede
+        && tabuleiro[atual.x+i][atual.y+j].estado != inicio){
+            coord.x = atual.x+i;
+            coord.y = atual.y+j;
+            caminho_dados[coord.x][coord.y].x = atual.x;
+            caminho_dados[coord.x][coord.y].y = atual.y;
+            insere_fila(fi, coord);
+            
+            if (tabuleiro[coord.x][coord.y].estado != destino)
+            tabuleiro[coord.x][coord.y].estado = checado;
+        }
+    }
+    if (tabuleiro[atual.x][atual.y].estado == checado) tabuleiro[atual.x][atual.y].estado = finalizado;
+
+    return 1;
+}
+
 //Desenha o tabuleiro na tela
 int mostrar_tabuleiro(celula** tabuleiro){
     if (tabuleiro == NULL) return 0;
@@ -120,15 +186,15 @@ int mostrar_tabuleiro(celula** tabuleiro){
                 break;
 
                 case vazio:
-                DrawRectangleRec(tabuleiro[x][y].rect, BLACK);
-                break;
-
-                case parede:
                 DrawRectangleRec(tabuleiro[x][y].rect, WHITE);
                 break;
 
-                case checado:
+                case parede:
                 DrawRectangleRec(tabuleiro[x][y].rect, BLACK);
+                break;
+
+                case checado:
+                DrawRectangleRec(tabuleiro[x][y].rect, WHITE);
                 break;
 
                 case finalizado:
@@ -149,10 +215,20 @@ int mostrar_tabuleiro(celula** tabuleiro){
         }
     }
 
-    for (int x=0; x<colunas_tela; ++x)
-    DrawLine(x*tamanho_celula, 0, x*tamanho_celula, linhas_tela*tamanho_celula, GRAY);
-    for (int y=0; y<linhas_tela; ++y)
-    DrawLine(0, y*tamanho_celula, colunas_tela*tamanho_celula, y*tamanho_celula, GRAY);
+    for (int x=0; x<colunas_tela+1; ++x)
+    DrawLine(x*tamanho_celula, 0, x*tamanho_celula, linhas_tela*tamanho_celula, BLACK);
+    for (int y=0; y<linhas_tela+1; ++y)
+    DrawLine(0, y*tamanho_celula, colunas_tela*tamanho_celula, y*tamanho_celula, BLACK);
+
+    return 1;
+}
+
+int desenhar_botao(Rectangle* botao, Color cor, char texto[]){
+    if (botao == NULL) return 0;
+
+    DrawRectangleRec(*botao, cor);
+    DrawText(texto, (*botao).x+10, (*botao).y+5, tamanho_fonte, BLACK);
+    DrawRectangleLines((*botao).x, (*botao).y, (*botao).x+(*botao).width, (*botao).y+(*botao).height, BLACK);
 
     return 1;
 }
@@ -202,23 +278,18 @@ int carregar_arquivo(celula** tabuleiro){
     return 1;
 }
 
-//Checa por click em celula do tabuleiro e muda seu estado dependendo do estado de alteracao
+//Checa por clique em celula do tabuleiro e muda seu estado dependendo do estado de alteracao
 int checar_clique(celula** tabuleiro){
     if (tabuleiro == NULL) return 0;
 
     if (IsKeyReleased(KEY_SPACE)) alt = !alt;
 
     for (int y=offset_y; y<linhas_tela+offset_y; ++y)
-    for (int x=offset_x; x<colunas_tela+offset_x; ++x){ 
-        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !alt)
-        switch (tabuleiro[x][y].estado){
-            case vazio:
-            tabuleiro[x][y].estado = parede;
-            break;
+    for (int x=offset_x; x<colunas_tela+offset_x; ++x){
+        int estado_switch = (tabuleiro[x][y].estado == vazio || tabuleiro[x][y].estado == checado || tabuleiro[x][y].estado == finalizado || tabuleiro[x][y].estado == caminho);
 
-            default:
-            break;
-        }
+        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !alt && estado_switch)
+        tabuleiro[x][y].estado = parede;
 
         if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonDown(MOUSE_RIGHT_BUTTON) && !alt)
         switch (tabuleiro[x][y].estado){
@@ -230,42 +301,34 @@ int checar_clique(celula** tabuleiro){
             break;
         }
 
-        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && alt)
-        switch (tabuleiro[x][y].estado){
-            case inicio:
-            tabuleiro[x][y].estado = vazio;
-            break;
+        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && alt){
+            if (tabuleiro[x][y].estado == inicio) tabuleiro[x][y].estado = vazio;
+            else if (estado_switch){
+                for (int y1=0; y1<linhas; y1++)
+                for (int x1=0; x1<colunas; x1++){
+                    if (tabuleiro[x1][y1].estado == inicio)
+                    tabuleiro[x1][y1].estado = vazio;
+                    if (tabuleiro[x1][y1].estado == checado || tabuleiro[x1][y1].estado == finalizado || tabuleiro[x1][y1].estado == caminho)
+                    tabuleiro[x1][y1].estado = vazio;
+                }
 
-            case vazio:
-            for (int y1=0; y1<linhas; y1++)
-            for (int x1=0; x1<colunas; x1++) 
-            if (tabuleiro[x1][y1].estado == inicio)
-            tabuleiro[x1][y1].estado = vazio;
-
-            tabuleiro[x][y].estado = inicio;
-            break;
-
-            default:
-            break;
+                tabuleiro[x][y].estado = inicio;
+            }
         }
 
-        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonReleased(MOUSE_RIGHT_BUTTON) && alt)
-        switch (tabuleiro[x][y].estado){
-            case destino:
-            tabuleiro[x][y].estado = vazio;
-            break;
+        if (CheckCollisionPointRec(GetMousePosition(), tabuleiro[x][y].rect) && IsMouseButtonReleased(MOUSE_RIGHT_BUTTON) && alt){
+            if (tabuleiro[x][y].estado == destino) tabuleiro[x][y].estado = vazio;
+            else if (estado_switch){
+                for (int x1=0; x1<colunas; x1++) 
+                for (int y1=0; y1<linhas; y1++){
+                    if (tabuleiro[x1][y1].estado == destino)
+                    tabuleiro[x1][y1].estado = vazio;
+                    if (tabuleiro[x1][y1].estado == checado || tabuleiro[x1][y1].estado == finalizado || tabuleiro[x1][y1].estado == caminho)
+                    tabuleiro[x1][y1].estado = vazio;
+                } 
 
-            case vazio:
-            for (int x1=0; x1<colunas; x1++) 
-            for (int y1=0; y1<linhas; y1++)
-            if (tabuleiro[x1][y1].estado == destino)
-            tabuleiro[x1][y1].estado = vazio;
-
-            tabuleiro[x][y].estado = destino;
-            break;
-
-            default:
-            break;
+                tabuleiro[x][y].estado = destino;
+            }
         }
     }
 
