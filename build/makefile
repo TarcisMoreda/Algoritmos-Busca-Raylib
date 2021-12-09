@@ -1,5 +1,5 @@
 busca: main.o game.o pilha.o fila.o
-	gcc main.o game.o pilha.o fila.o -o BuscaProfundidade.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor
+	gcc main.o game.o pilha.o fila.o -o Busca.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor
 
 main.o: ../src/main.c ../include/game.h
 	gcc -c ../src/main.c
@@ -14,4 +14,4 @@ fila.o: ../src/fila.c ../include/fila.h ../include/dados.h
 	gcc -c ../src/fila.c
 
 clean:
-	rm *.o BuscaProfundidade.bin
+	rm *.o Busca.bin

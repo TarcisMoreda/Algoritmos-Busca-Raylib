@@ -24,7 +24,7 @@ Apos instalar os requisitos mencionados e baixar o repositorio, entre na pasta b
 git clone https://github.com/TarcisMoreda/Busca-em-Profundidade-Raylib.git
 cd Busca\ Em\ Profundidade\ Raylib/build
 make
-./BuscaProfundidade.bin
+./Busca.bin
 ```
 
 ## Controles:
