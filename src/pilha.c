@@ -1,5 +1,4 @@
 #include "../include/pilha.h"
-#include <stdlib.h>
 
 //Cria uma pilha vazia
 pilha* criar_pilha(){

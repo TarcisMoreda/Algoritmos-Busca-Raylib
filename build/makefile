@@ -1,17 +1,26 @@
-busca: main.o game.o pilha.o fila.o
-	gcc main.o game.o pilha.o fila.o -o Busca.bin -lraylib -lglfw -lGL -lopenal -lm -pthread -ldl -lX11 -lXrandr -lXinerama -lXi -lXxf86vm -lXcursor
+GCC=gcc
+CFLAGS=-g -Wall
+LIBS=-lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
-main.o: ../src/main.c ../include/game.h
-	gcc -c ../src/main.c
+SRC=../src
+INC=../include
+OBJ=obj
+SRCS=$(wildcard $(SRC)/*.c)
+OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
+HDRS=$(wildcard $(INC)/*.h)
+BIN=AlgBusca
 
-game.o: ../src/game.c ../include/game.h
-	gcc -c ../src/game.c
+all: $(BIN)
 
-pilha.o: ../src/pilha.c ../include/pilha.h ../include/dados.h
-	gcc -c ../src/pilha.c
+$(BIN): $(OBJS) $(OBJ)
+	$(GCC) $(CFLAGS) $(OBJS) -o $(BIN) $(LIBS)
 
-fila.o: ../src/fila.c ../include/fila.h ../include/dados.h
-	gcc -c ../src/fila.c
+$(OBJ)/%.o: $(SRC)/%.c $(OBJ)
+	$(GCC) $(CFLAGS) -c $< -o $@
+
+$(OBJ):
+	mkdir -p $@
 
 clean:
-	rm *.o Busca.bin
+	$(RM) -r $(OBJ)
+	$(RM) $(BIN)

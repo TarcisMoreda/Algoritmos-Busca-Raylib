@@ -1,11 +1,11 @@
-#include "dados.h"
+#include "comum.h"
 
 #if !defined(FILA_H)
 #define FILA_H
 
 typedef struct fila{
-	elemento *inicio;
-	elemento *fim;
+	elemento* inicio;
+	elemento* fim;
 } fila;
 
 fila* criar_fila();

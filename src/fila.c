@@ -1,5 +1,4 @@
 #include "../include/fila.h"
-#include <stdlib.h>
 
 //Cria uma fila vazia
 fila* criar_fila(){

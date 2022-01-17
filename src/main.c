@@ -1,4 +1,8 @@
+#include "../include/comum.h"
 #include "../include/game.h"
+#include "../include/renderizador.h"
+#include "../include/pilha.h"
+#include "../include/fila.h"
 
 int main(int argc, char const *argv[]){
     //Alocando toda a memoria nescessaria para o jogo funcionar

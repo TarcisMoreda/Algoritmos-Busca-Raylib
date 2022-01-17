@@ -1,4 +1,5 @@
-#include "dados.h"
+#include "comum.h"
+
 #if !defined(PILHA_H)
 #define PILHA_H
 
